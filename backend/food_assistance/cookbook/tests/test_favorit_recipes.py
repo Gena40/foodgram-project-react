@@ -1,8 +1,7 @@
-from rest_framework import status
-from rest_framework.test import APITestCase, APIClient
+from cookbook.models import FavoritRecipes, Recipe
 from django.contrib.auth import get_user_model
-from cookbook.models import Recipe, FavoritRecipes
-
+from rest_framework import status
+from rest_framework.test import APIClient, APITestCase
 
 User = get_user_model()
 
@@ -53,7 +52,10 @@ class FavoritRecipesTests(APITestCase):
         len_favorit_recipes_after = len(FavoritRecipes.objects.filter(
             user=self.test_user
         ))
-        self.assertNotEqual(len_favorit_recipes_before, len_favorit_recipes_after)
+        self.assertNotEqual(
+            len_favorit_recipes_before,
+            len_favorit_recipes_after
+        )
 
     def test_add_into_favorites_twice(self):
         """
@@ -65,7 +67,10 @@ class FavoritRecipesTests(APITestCase):
         response = self.auth_client.post(f'/api/recipes/{recipe_id}/favorite/')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_dict = response.json()
-        self.assertEqual(response_dict.get('errors'), "Recipe already in favorites.")
+        self.assertEqual(
+            response_dict.get('errors'),
+            "Recipe already in favorites."
+        )
 
     def test_del_from_favorites(self):
         """
@@ -80,7 +85,9 @@ class FavoritRecipesTests(APITestCase):
             user=self.test_user
         ))
         self.assertNotEqual(len_fav_recipes_before, len_fav_recipes_after_add)
-        response = self.auth_client.delete(f'/api/recipes/{recipe_id}/favorite/')
+        response = self.auth_client.delete(
+            f'/api/recipes/{recipe_id}/favorite/'
+        )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         len_fav_recipes_after_del = len(FavoritRecipes.objects.filter(
             user=self.test_user
@@ -93,7 +100,12 @@ class FavoritRecipesTests(APITestCase):
         которого там нет.
         """
         recipe_id = self.test_recipe2.id
-        response = self.auth_client.delete(f'/api/recipes/{recipe_id}/favorite/')
+        response = self.auth_client.delete(
+            f'/api/recipes/{recipe_id}/favorite/'
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_dict = response.json()
-        self.assertEqual(response_dict.get('errors'), "Recipe not in favorites.")
+        self.assertEqual(
+            response_dict.get('errors'),
+            "Recipe not in favorites."
+        )

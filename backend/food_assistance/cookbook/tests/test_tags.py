@@ -1,8 +1,7 @@
+from cookbook.models import Tag
+from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
-from django.contrib.auth import get_user_model
-from cookbook.models import Tag
-
 
 User = get_user_model()
 

@@ -1,9 +1,9 @@
-from django.shortcuts import get_object_or_404
-from rest_framework import serializers, status
-from cookbook.models import Tag, Ingredient, Recipe, RecipeIngredients, ShoppingCartRecipes
-from users.serializers import UserSerializer
+from cookbook.models import (Ingredient, Recipe, RecipeIngredients,
+                             ShoppingCartRecipes, Tag)
 from django.contrib.auth import get_user_model
 from drf_extra_fields.fields import Base64ImageField
+from rest_framework import serializers
+from users.serializers import UserSerializer
 
 User = get_user_model()
 
@@ -135,10 +135,8 @@ class SbscrptSerializer(serializers.ModelSerializer):
             return True
         if request and hasattr(request, 'user'):
             current_user = request.user
-        following = False
         if request.user.is_authenticated:
-            following = obj.following.filter(user=current_user).exists()
-            return following
+            return obj.following.filter(user=current_user).exists()
         return False
 
     def get_recipes_count(self, obj) -> int:
@@ -164,7 +162,8 @@ class RecipesSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
     ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
-    # is_in_shopping_cart
+    is_in_shopping_cart = serializers.SerializerMethodField()
+
     class Meta:
         model = Recipe
         fields = (
@@ -173,11 +172,24 @@ class RecipesSerializer(serializers.ModelSerializer):
             'author',
             'ingredients',
             'is_favorited',
+            'is_in_shopping_cart',
             'name',
             'image',
             'text',
             'cooking_time'
         )
+
+    def get_is_in_shopping_cart(self, obj):
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
+            current_user = request.user
+        try:
+            current_user.shopping_cart_recipes.get(
+                id=obj.id
+            )
+            return True
+        except Exception:
+            return False
 
     def get_ingredients(self, recipe_obj):
         ingr_in_recipe_obj = recipe_obj.igredients_in_recipe.all()
@@ -234,6 +246,7 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
     )
     ingredients = IngredientInCreateUpdateRecipeSerializer(many=True)
     image = Base64ImageField()
+
     class Meta:
         model = Recipe
         fields = (

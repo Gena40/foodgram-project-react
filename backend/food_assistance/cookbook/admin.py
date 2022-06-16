@@ -1,5 +1,6 @@
+from cookbook.models import (FavoritRecipes, Ingredient, Recipe,
+                             RecipeIngredients, ShoppingCartRecipes, Tag)
 from django.contrib import admin
-from cookbook.models import Recipe, Ingredient, Tag, RecipeIngredients, FavoritRecipes, ShoppingCartRecipes
 
 
 class FavoritRecipesAdmin(admin.ModelAdmin):

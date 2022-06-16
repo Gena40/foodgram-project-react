@@ -1,10 +1,11 @@
-from rest_framework import status
-from rest_framework.test import APITestCase, APIClient
+from cookbook.models import (FavoritRecipes, Ingredient, Recipe,
+                             RecipeIngredients, Tag)
 from django.contrib.auth import get_user_model
-from cookbook.models import Recipe, FavoritRecipes, Tag, Ingredient, RecipeIngredients
-
+from rest_framework import status
+from rest_framework.test import APIClient, APITestCase
 
 User = get_user_model()
+
 
 class RecipesListTests(APITestCase):
     def setUp(self) -> None:
@@ -36,7 +37,7 @@ class RecipesListTests(APITestCase):
             author=self.author,
             name='test_recipe_name',
             text='test_recipe_text',
-            image = '',
+            image='',
             cooking_time=12
         )
         self.test_recipe.tags.add(self.tag1)
@@ -71,6 +72,17 @@ class RecipesListTests(APITestCase):
         response = self.auth_client.get('/api/recipes/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response = self.client.get('/api/recipes/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_recipe_detail_access(self):
+        """
+        Проверка доступности эндпоинта
+        /api/recipes/id для всех пользователей.
+        """
+        recipe_id = self.test_recipe.id
+        response = self.auth_client.get(f'/api/recipes/{recipe_id}/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.get(f'/api/recipes/{recipe_id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_recipes_list_pagination(self):
@@ -138,7 +150,7 @@ class RecipesListTests(APITestCase):
             'test_recipe3_name'
         )
 
-    def test_recipes_list_author(self):
+    def test_recipes_list_tags(self):
         """
         Проверка параметра запроса tags.
         """
@@ -152,6 +164,31 @@ class RecipesListTests(APITestCase):
 
         tag2_slug = self.tag2.slug
         response = self.auth_client.get(
+            f'/api/recipes/?page=1&limit=10&tags={tag2_slug}'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_dict = response.json()
+        self.assertEqual(response_dict.get('count'), 1)
+        self.assertEqual(
+            response_dict.get('results')[0].get('name'),
+            'test_recipe_name'
+        )
+
+    def test_recipes_list_tags_access(self):
+        """
+        Проверка доступности фильтрации по тегам для
+        неавторизованных пользователей.
+        """
+        tag1_slug = self.tag1.slug
+        response = self.client.get(
+            f'/api/recipes/?page=1&limit=10&tags={tag1_slug}'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_dict = response.json()
+        self.assertEqual(response_dict.get('count'), 2)
+
+        tag2_slug = self.tag2.slug
+        response = self.client.get(
             f'/api/recipes/?page=1&limit=10&tags={tag2_slug}'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -223,26 +260,39 @@ class CreateRecipeTests(APITestCase):
         self.assertEqual(response_dict.get('name'), 'new_recipe')
         self.assertEqual(response_dict.get('text'), 'text about new recipe')
         self.assertEqual(response_dict.get('cooking_time'), 30)
-        self.assertEqual(response_dict.get('author').get('username'), 'test_user')
+        self.assertEqual(
+            response_dict.get('author').get('username'),
+            'test_user'
+        )
         self.assertEqual(len(response_dict.get('tags')), 2)
-        self.assertEqual(response_dict.get('ingredients')[0].get('name'), 'ingr1_name')
+        self.assertEqual(
+            response_dict.get('ingredients')[0].get('name'),
+            'ingr1_name'
+        )
 
     def test_response_content_is_correct(self):
         """
         При создании нового рецепта возвращается JSON, соответствующий ReDoc.
         """
-        response_dict = self.auth_client.post('/api/recipes/', self.data).json()
+        response_dict = self.auth_client.post(
+            '/api/recipes/',
+            self.data
+        ).json()
         self.assertEqual(
             list(response_dict.keys()),
             [
                 'id', 'tags', 'author', 'ingredients', 'is_favorited',
-                'name', 'image', 'text', 'cooking_time'
+                'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time'
             ]
         )
         self.assertEqual(type(response_dict.get('tags')), type([]))
         self.assertEqual(type(response_dict.get('ingredients')), type([]))
         self.assertEqual(type(response_dict.get('author')), type(dict()))
         self.assertEqual(type(response_dict.get('is_favorited')), type(True))
+        self.assertEqual(
+            type(response_dict.get('is_in_shopping_cart')),
+            type(True)
+        )
 
     def test_not_create_new_recipe(self):
         """
@@ -272,7 +322,10 @@ class CreateRecipeTests(APITestCase):
         for field, data in data_without_field.items():
             with self.subTest(data=data):
                 response = self.auth_client.post('/api/recipes/', data)
-                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertEqual(
+                    response.status_code,
+                    status.HTTP_400_BAD_REQUEST
+                )
                 response_dict = response.json()
                 self.assertIn(field, response_dict.keys())
 
@@ -368,9 +421,15 @@ class GetPatchDelRecipeTests(APITestCase):
         self.assertEqual(response_dict.get('name'), 'test_recipe_name')
         self.assertEqual(response_dict.get('text'), 'test_recipe_text')
         self.assertEqual(response_dict.get('cooking_time'), 12)
-        self.assertEqual(response_dict.get('author').get('username'), 'test_user')
+        self.assertEqual(
+            response_dict.get('author').get('username'),
+            'test_user'
+        )
         self.assertEqual(len(response_dict.get('tags')), 2)
-        self.assertEqual(response_dict.get('ingredients')[0].get('name'), 'ingr1_name')
+        self.assertEqual(
+            response_dict.get('ingredients')[0].get('name'),
+            'ingr1_name'
+        )
 
     def test_update_recipe(self):
         """
@@ -393,19 +452,31 @@ class GetPatchDelRecipeTests(APITestCase):
             "name": "updating_name",
             "text": "updating_text",
             "cooking_time": 60
-}
+        }
         recipe_id = self.test_recipe2.id
-        response = self.auth_client.patch(f'/api/recipes/{recipe_id}/', update_data)
+        response = self.auth_client.patch(
+            f'/api/recipes/{recipe_id}/',
+            update_data
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_dict = response.json()
         self.assertEqual(response_dict.get('id'), recipe_id)
         self.assertEqual(response_dict.get('name'), 'updating_name')
         self.assertEqual(response_dict.get('text'), 'updating_text')
         self.assertEqual(response_dict.get('cooking_time'), 60)
-        self.assertEqual(response_dict.get('author').get('username'), 'test_user')
+        self.assertEqual(
+            response_dict.get('author').get('username'),
+            'test_user'
+        )
         self.assertEqual(len(response_dict.get('tags')), 1)
-        self.assertEqual(response_dict.get('ingredients')[0].get('name'), 'ingr1_name')
-        self.assertEqual(response_dict.get('ingredients')[0].get('amount'), 100)
+        self.assertEqual(
+            response_dict.get('ingredients')[0].get('name'),
+            'ingr1_name'
+        )
+        self.assertEqual(
+            response_dict.get('ingredients')[0].get('amount'),
+            100
+        )
 
     def test_update400error_recipe(self):
         """
@@ -428,11 +499,17 @@ class GetPatchDelRecipeTests(APITestCase):
             "cooking_time": 30
         }
         recipe_id = self.test_recipe2.id
-        response = self.auth_client.patch(f'/api/recipes/{recipe_id}/', update_data)
+        response = self.auth_client.patch(
+            f'/api/recipes/{recipe_id}/',
+            update_data
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_dict = response.json()
         self.assertEqual(type(response_dict.get('ingredients')), type([]))
-        self.assertEqual(response_dict.get('ingredients')[0].get('amount'), ['Amount of ingredients must be > 0'])
+        self.assertEqual(
+            response_dict.get('ingredients')[0].get('amount'),
+            ['Amount of ingredients must be > 0']
+        )
 
     def test_update_permission_error_recipe(self):
         """
@@ -455,7 +532,10 @@ class GetPatchDelRecipeTests(APITestCase):
             "cooking_time": 30
         }
         recipe_id = self.test_recipe2.id
-        response = self.auth_client2.patch(f'/api/recipes/{recipe_id}/', update_data)
+        response = self.auth_client2.patch(
+            f'/api/recipes/{recipe_id}/',
+            update_data
+        )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_recipe(self):

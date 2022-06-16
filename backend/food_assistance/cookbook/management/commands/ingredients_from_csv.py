@@ -1,10 +1,10 @@
-import os
 import logging
+import os
+from csv import DictReader
 from logging.handlers import RotatingFileHandler
 
-from csv import DictReader
-from django.core.management.base import BaseCommand
 from cookbook.models import Ingredient
+from django.core.management.base import BaseCommand
 from food_assistance.settings import BASE_DIR
 
 logger = logging.getLogger(__name__)

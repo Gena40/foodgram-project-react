@@ -1,8 +1,7 @@
-from rest_framework import status
-from rest_framework.test import APITestCase, APIClient
-from django.contrib.auth import get_user_model
 from cookbook.models import Follow
-
+from django.contrib.auth import get_user_model
+from rest_framework import status
+from rest_framework.test import APIClient, APITestCase
 
 User = get_user_model()
 
@@ -27,16 +26,28 @@ class CreateUserTests(APITestCase):
         response_dict = response.json()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response_dict.get('email'), self.data.get('email'))
-        self.assertEqual(response_dict.get('username'), self.data.get('username'))
-        self.assertEqual(response_dict.get('first_name'), self.data.get('first_name'))
-        self.assertEqual(response_dict.get('last_name'), self.data.get('last_name'))
+        self.assertEqual(
+            response_dict.get('username'),
+            self.data.get('username')
+        )
+        self.assertEqual(
+            response_dict.get('first_name'),
+            self.data.get('first_name')
+        )
+        self.assertEqual(
+            response_dict.get('last_name'),
+            self.data.get('last_name')
+        )
 
     def test_response_content_is_correct(self):
         """
         При создании нового user возвращается JSON, соответствующий ReDoc.
         """
         response_dict = self.client.post(self.url, self.data).json()
-        self.assertEqual(list(response_dict.keys()), ['email', 'id', 'username', 'first_name', 'last_name'])
+        self.assertEqual(
+            list(response_dict.keys()),
+            ['email', 'id', 'username', 'first_name', 'last_name']
+        )
 
     def test_not_create_new_user(self):
         """
@@ -61,18 +72,21 @@ class CreateUserTests(APITestCase):
             with self.subTest(data=data):
                 response = self.client.post(self.url, data)
                 response_dict = response.json()
-                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertEqual(
+                    response.status_code,
+                    status.HTTP_400_BAD_REQUEST
+                )
                 self.assertIn(field, response_dict.keys())
 
 
 class ListUsersTests(APITestCase):
     def setUp(self) -> None:
         self.user = User.objects.create_user(
-            email = "user@yandex.ru",
-            username = "user_me",
-            first_name = "me_name",
-            last_name = "me_family",
-            password = "Me**Qwerty123"
+            email="user@yandex.ru",
+            username="user_me",
+            first_name="me_name",
+            last_name="me_family",
+            password="Me**Qwerty123"
         )
 
         self.url = '/api/users/'
@@ -100,7 +114,10 @@ class ListUsersTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_dict = response.json()
         self.assertEqual(len(all_users), self.number_of_test_users + 1)
-        self.assertEqual(response_dict.get('count'), self.number_of_test_users + 1)
+        self.assertEqual(
+            response_dict.get('count'),
+            self.number_of_test_users + 1
+        )
         self.assertEqual(len(response_dict.get('results')), 5)
 
 
@@ -108,11 +125,18 @@ class ProfileUsersTests(APITestCase):
     def setUp(self) -> None:
         self.url = '/api/users/'
         self.user = User.objects.create_user(
-            email = "user@yandex.ru",
-            username = "user_me",
-            first_name = "me_name",
-            last_name = "me_family",
-            password = "Me**Qwerty123"
+            email="user@yandex.ru",
+            username="user_me",
+            first_name="me_name",
+            last_name="me_family",
+            password="Me**Qwerty123"
+        )
+        self.test_user = User.objects.create_user(
+            email="test_user@yandex.ru",
+            username="test_user",
+            first_name="test_user_name",
+            last_name="test_user_family",
+            password="test_user**Qwerty123"
         )
         self.auth_client = APIClient()
         self.auth_client.force_authenticate(user=self.user)
@@ -157,7 +181,8 @@ class ProfileUsersTests(APITestCase):
 
     def test_401_profile(self):
         """
-        Проверка возвращает ли запрос от незалогиненого пользователя ошибку 401.
+        Проверка возвращает ли запрос от незалогиненого
+        пользователя ошибку 401.
         """
         exist_user = User.objects.get(username='vasya')
         response = self.auth_client.get(f'/api/users/{exist_user.id}/')
@@ -165,9 +190,9 @@ class ProfileUsersTests(APITestCase):
         response = self.client.get(f'/api/users/{exist_user.id}/')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-        response = self.auth_client.get(f'/api/users/me/')
+        response = self.auth_client.get('/api/users/me/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response = self.client.get(f'/api/users/me/')
+        response = self.client.get('/api/users/me/')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 

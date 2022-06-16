@@ -1,10 +1,8 @@
-from django.db.utils import IntegrityError
-from rest_framework import status
-from django.db.utils import DataError
-from rest_framework.test import APITestCase
-from cookbook.models import Tag, Ingredient, Recipe, User, Follow, RecipeIngredients
+from cookbook.models import (Follow, Ingredient, Recipe, RecipeIngredients,
+                             Tag, User)
+from django.db.utils import DataError, IntegrityError
 from food_assistance.settings import MEDIA_ROOT
-
+from rest_framework.test import APITestCase
 
 
 class StrModelsTest(APITestCase):
@@ -12,25 +10,23 @@ class StrModelsTest(APITestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = User.objects.create_user(
-            email = "vpupkin@yandex.ru",
-            username = "vasya",
-            first_name = "Вася",
-            last_name = "Пупкин",
-            password = "123**Qwerty123"
+            email="vpupkin@yandex.ru",
+            username="vasya",
+            first_name="Вася",
+            last_name="Пупкин",
+            password="123**Qwerty123"
         )
         cls.author = User.objects.create_user(
-            email = "author@yandex.ru",
-            username = "author",
-            first_name = "Автор",
-            last_name = "Шеф",
-            password = "123**sheff!"
+            email="author@yandex.ru",
+            username="author",
+            first_name="Автор",
+            last_name="Шеф",
+            password="123**sheff!"
         )
         cls.follow = Follow.objects.create(
-            user = cls.user,
-            author = cls.author
+            user=cls.user,
+            author=cls.author
         )
-        # cls.client = APIClient()
-        # cls.client.force_authenticate(user=cls.user)
         cls.tag = Tag.objects.create(
             name='test_tag_name',
             color='#49B64E',
@@ -44,7 +40,7 @@ class StrModelsTest(APITestCase):
             name='Запеканка по-домашнему',
             author=cls.user,
             text='test_recipe_text',
-            image = MEDIA_ROOT + 'test.jpg',
+            image=MEDIA_ROOT + 'test.jpg',
             cooking_time=30
         )
         cls.resipe_ingr = RecipeIngredients.objects.create(
@@ -53,14 +49,17 @@ class StrModelsTest(APITestCase):
             amount=13
         )
 
-
     def test_models_have_correct_object_names(self):
         """Проверяем что у моделей корректно работает __str__."""
         obj2tring = {
             StrModelsTest.tag: 'test_tag_name',
             StrModelsTest.ingredient: 'test_ingr',
-            StrModelsTest.recipe: 'Рецепт "Запеканка по-домашнему" автора vasya',
-            StrModelsTest.follow: 'Пользователь vasya подписан на автора author',
+            StrModelsTest.recipe: (
+                'Рецепт "Запеканка по-домашнему" автора vasya'
+            ),
+            StrModelsTest.follow: (
+                'Пользователь vasya подписан на автора author'
+            ),
             StrModelsTest.resipe_ingr: (
                 'Количество ингредиента test_ingr в рецепте'
                 ' Рецепт "Запеканка по-домашнему" автора vasya - 13'
@@ -69,7 +68,7 @@ class StrModelsTest(APITestCase):
         for obj, obj_str in obj2tring.items():
             with self.subTest(obj=obj):
                 self.assertEqual(str(obj), obj_str)
-    
+
     def test_validate_cooking_time(self):
         """
         Проверка невозможности создания рецепта
@@ -92,7 +91,7 @@ class TagsModelTests(APITestCase):
         """
         with self.assertRaises(DataError):
             Tag.objects.create(
-                name='too_long_name'*20,
+                name='too_long_name' * 20,
                 color='#h12345',
                 slug='test_slug1'
             )
@@ -116,5 +115,5 @@ class TagsModelTests(APITestCase):
             Tag.objects.create(
                 name='tag_name2',
                 color='#h23456',
-                slug='too_long_slug'*20
+                slug='too_long_slug' * 20
             )

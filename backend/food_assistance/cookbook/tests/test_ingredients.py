@@ -1,8 +1,7 @@
+from cookbook.models import Ingredient
+from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
-from django.contrib.auth import get_user_model
-from cookbook.models import Ingredient
-
 
 User = get_user_model()
 
@@ -49,7 +48,7 @@ class IngredientsListTests(APITestCase):
         Проверка работы поиска по частичному вхождению
         в начале названия ингредиента /api/ingredient/{id}
         """
-        response = self.client.get(f'/api/ingredients/?search=ingr2')
+        response = self.client.get('/api/ingredients/?search=ingr2')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_dict = response.json()
         self.assertEqual(len(response_dict), 1)

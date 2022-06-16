@@ -1,5 +1,5 @@
+from cookbook.models import Follow, User
 from django.contrib import admin
-from cookbook.models import User, Follow
 
 
 class UserAdmin(admin.ModelAdmin):
@@ -11,7 +11,7 @@ class UserAdmin(admin.ModelAdmin):
     )
     filter_horizontal = ('favorite_recipes',)
     list_filter = ('email', 'username')
-    empty_value_display='-пусто-'
+    empty_value_display = '-пусто-'
 
 
 class FollowAdmin(admin.ModelAdmin):

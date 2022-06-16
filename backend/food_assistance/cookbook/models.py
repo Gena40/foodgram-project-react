@@ -1,10 +1,11 @@
 import os
-from django.db import models
-from django.contrib.auth.models import AbstractUser
-from django.db.models.fields.related import ForeignKey
 from datetime import datetime
-from food_assistance.settings import MEDIA_ROOT
+
+from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator
+from django.db import models
+from django.db.models.fields.related import ForeignKey
+from food_assistance.settings import MEDIA_ROOT
 
 
 def get_img_path(instanse, filename: str) -> str:
@@ -25,6 +26,14 @@ class User(AbstractUser):
         related_name='favorite_recipes',
         verbose_name='Избранные рецепты',
         help_text='Избранные рецепты'
+    )
+    shopping_cart_recipes = models.ManyToManyField(
+        'Recipe',
+        through='ShoppingCartRecipes',
+        blank=True,
+        related_name='shopping_cart_recipes',
+        verbose_name='Рецепты в корзине',
+        help_text='Рецепты в корзине'
     )
 
 
@@ -191,6 +200,7 @@ class FavoritRecipes(models.Model):
         verbose_name='Рецепт',
         help_text='Избранный рецепт'
     )
+
     class Meta:
         verbose_name = 'Избранный рецепт'
         verbose_name_plural = 'Избранные рецепты'
@@ -221,6 +231,7 @@ class Follow(models.Model):
         verbose_name='Автор',
         help_text='Автор рецепта'
     )
+
     class Meta:
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
@@ -251,6 +262,7 @@ class ShoppingCartRecipes(models.Model):
         verbose_name='Рецепт',
         help_text='Рецепт в корзину'
     )
+
     class Meta:
         verbose_name = 'Рецепт в корзине'
         verbose_name_plural = 'Рецепты в корзине'

@@ -1,17 +1,10 @@
+from cookbook.views import (DownloadShoppingCartViewSet,
+                            FavoriteRecipesViewSet, IngredientViewSet,
+                            RecipesViewSet, SbscrptViewSet,
+                            ShoppingCartViewSet, SubscribeViewSet, TagViewSet)
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from django.urls import path, include
 from users.views import SpecialUserViewSet
-from cookbook.views import (
-    TagViewSet,
-    IngredientViewSet,
-    SbscrptViewSet,
-    SubscribeViewSet,
-    FavoriteRecipesViewSet,
-    RecipesViewSet,
-    ShoppingCartViewSet,
-    DownloadShoppingCartViewSet
-)
-
 
 app_name = 'cookbook'
 

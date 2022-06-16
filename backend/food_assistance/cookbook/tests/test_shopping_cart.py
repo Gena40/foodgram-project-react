@@ -1,10 +1,11 @@
-from rest_framework import status
-from rest_framework.test import APITestCase, APIClient
+from cookbook.models import (Ingredient, Recipe, RecipeIngredients,
+                             ShoppingCartRecipes, Tag)
 from django.contrib.auth import get_user_model
-from cookbook.models import Recipe, ShoppingCartRecipes, Tag, Ingredient, RecipeIngredients
-
+from rest_framework import status
+from rest_framework.test import APIClient, APITestCase
 
 User = get_user_model()
+
 
 class ShoppingCartTests(APITestCase):
     def setUp(self) -> None:
@@ -44,7 +45,7 @@ class ShoppingCartTests(APITestCase):
             author=self.author,
             name='test_recipe_name',
             text='test_recipe_text',
-            image = '',
+            image='',
             cooking_time=12
         )
         self.test_recipe.tags.add(self.tag1)
@@ -63,7 +64,7 @@ class ShoppingCartTests(APITestCase):
             author=self.author,
             name='test_recipe2_name',
             text='test_recipe2_text',
-            image = '',
+            image='',
             cooking_time=25
         )
         self.test_recipe2.tags.add(self.tag1)
@@ -92,7 +93,10 @@ class ShoppingCartTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_dict = response.json()
-        self.assertEqual(response_dict.get('errors'), 'Recipe already in shopping cart.')
+        self.assertEqual(
+            response_dict.get('errors'),
+            'Recipe already in shopping cart.'
+        )
 
         response = self.client.post(
             f'/api/recipes/{recipe_id}/shopping_cart/'
@@ -125,9 +129,27 @@ class ShoppingCartTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_dict = response.json()
-        self.assertEqual(response_dict.get('errors'), 'Recipe not in shopping cart.')
+        self.assertEqual(
+            response_dict.get('errors'),
+            'Recipe not in shopping cart.'
+        )
 
         response = self.client.delete(
             f'/api/recipes/{recipe_id}/shopping_cart/'
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_download_shopping_cart(self):
+        """
+        Проверка эндпоинта списка покупок.
+        """
+        ShoppingCartRecipes.objects.create(
+            user=self.test_user,
+            recipe=self.test_recipe
+        )
+        response = self.client.get('/api/recipes/download_shopping_cart/')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.auth_client.get('/api/recipes/download_shopping_cart/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual('ingr1_name' in str(response.content), True)
+        self.assertEqual('ingr2_name' in str(response.content), True)

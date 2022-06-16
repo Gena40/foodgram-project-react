@@ -1,8 +1,7 @@
-from rest_framework import status
-from rest_framework.test import APITestCase, APIClient
+from cookbook.models import Follow, Recipe
 from django.contrib.auth import get_user_model
-from cookbook.models import Recipe, Follow
-
+from rest_framework import status
+from rest_framework.test import APIClient, APITestCase
 
 User = get_user_model()
 
@@ -86,15 +85,16 @@ class MyFollowsTests(APITestCase):
             cooking_time=12
         )
         url = '/api/users/subscriptions/'
-        response = self.auth_client.get(url + '?limit=10&page=1&recipes_limit=1')
+        query_params = '?limit=10&page=1&recipes_limit='
+        response = self.auth_client.get(url + query_params + '1')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_dict = response.json().get('results')[1]
         self.assertEqual(len(response_dict.get('recipes')), 1)
-        response = self.auth_client.get(url + '?limit=10&page=1&recipes_limit=2')
+        response = self.auth_client.get(url + query_params + '2')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_dict = response.json().get('results')[1]
         self.assertEqual(len(response_dict.get('recipes')), 2)
-        response = self.auth_client.get(url + '?limit=10&page=1&recipes_limit=12')
+        response = self.auth_client.get(url + query_params + '12')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_dict = response.json().get('results')[1]
         self.assertEqual(len(response_dict.get('recipes')), 3)
@@ -154,7 +154,10 @@ class SubscribeTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_dict = response.json()
-        self.assertEqual(response_dict.get('errors'), "You can't subscribe to yourself.")
+        self.assertEqual(
+            response_dict.get('errors'),
+            "You can't subscribe to yourself."
+        )
 
     def test_subscribe_twice(self):
         """
@@ -169,7 +172,10 @@ class SubscribeTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_dict = response.json()
-        self.assertEqual(response_dict.get('errors'), "This subscription already exists.")
+        self.assertEqual(
+            response_dict.get('errors'),
+            "This subscription already exists."
+        )
 
     def test_unsubscribe(self):
         """
@@ -186,7 +192,7 @@ class SubscribeTests(APITestCase):
         self.assertEqual(response.json()[0].get('username'), 'author')
         response = self.auth_client.delete(
             f'/api/users/{self.author.id}/subscribe/'
-            )
+        )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         response = self.auth_client.get('/api/users/subscriptions/')
         self.assertEqual(len(response.json()), 0)
@@ -200,7 +206,10 @@ class SubscribeTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_dict = response.json()
-        self.assertEqual(response_dict.get('errors'), "You can't subscribe to yourself.")
+        self.assertEqual(
+            response_dict.get('errors'),
+            "You can't subscribe to yourself."
+        )
 
     def test_unfollow_not_exist(self):
         """
@@ -211,4 +220,7 @@ class SubscribeTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_dict = response.json()
-        self.assertEqual(response_dict.get('errors'), "Subscription does not exist.")
+        self.assertEqual(
+            response_dict.get('errors'),
+            "Subscription does not exist."
+        )

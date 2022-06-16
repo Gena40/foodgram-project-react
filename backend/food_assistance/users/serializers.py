@@ -1,7 +1,6 @@
-from djoser.serializers import UserCreateSerializer
 from django.contrib.auth import get_user_model
+from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
-
 
 User = get_user_model()
 
@@ -10,6 +9,7 @@ class SpecialUserCreateSerializer(UserCreateSerializer):
     last_name = serializers.CharField(required=True)
     first_name = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
+
     class Meta:
         model = User
         fields = (
@@ -29,6 +29,7 @@ class UserSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField(
         method_name='get_is_subscribed'
     )
+
     class Meta:
         model = User
         fields = (
