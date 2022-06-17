@@ -7,8 +7,9 @@ from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from users.pagination import CustomPagination
+from users.models import Follow
 from cookbook.filters import RecipeFilter
-from cookbook.models import (FavoritRecipes, Follow, Ingredient, Recipe,
+from cookbook.models import (FavoritRecipes, Ingredient, Recipe,
                              RecipeIngredients, ShoppingCartRecipes, Tag)
 from cookbook.permissions import IsAuthor
 from cookbook.serializers import (DownloadShoppingCartSerializer,
@@ -149,9 +150,9 @@ class RecipesViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == 'create':
-            return [permissions.IsAuthenticated()]
+            return (permissions.IsAuthenticated(),)
         if self.action == 'partial_update':
-            return [IsAuthor()]
+            return (IsAuthor(),)
         return super().get_permissions()
 
     def get_serializer_class(self):

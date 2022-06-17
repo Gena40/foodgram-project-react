@@ -1,12 +1,14 @@
 import os
 from datetime import datetime
 
-from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models.fields.related import ForeignKey
 
-from food_assistance.settings import MEDIA_ROOT
+from food_assistance.settings import (MEDIA_ROOT,
+                                      MINIMUM_AMOUNT_OF_INGREDIENT,
+                                      MINIMUM_COOKING_TIME)
+from users.models import User
 
 
 def get_img_path(instanse, filename: str) -> str:
@@ -15,26 +17,6 @@ def get_img_path(instanse, filename: str) -> str:
     """
     timestamp = str(int(datetime.timestamp(datetime.now())))
     return os.path.join(MEDIA_ROOT, timestamp + filename)
-
-
-class User(AbstractUser):
-    """Модель пользователя, расширенная полем с избранными рецептами."""
-    favorite_recipes = models.ManyToManyField(
-        'Recipe',
-        through='FavoritRecipes',
-        blank=True,
-        related_name='favorite_recipes',
-        verbose_name='Избранные рецепты',
-        help_text='Избранные рецепты'
-    )
-    shopping_cart_recipes = models.ManyToManyField(
-        'Recipe',
-        through='ShoppingCartRecipes',
-        blank=True,
-        related_name='shopping_cart_recipes',
-        verbose_name='Рецепты в корзине',
-        help_text='Рецепты в корзине'
-    )
 
 
 class Tag(models.Model):
@@ -138,7 +120,7 @@ class Recipe(models.Model):
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления, мин.',
         help_text='Введите время приготовления (в минутах)',
-        validators=[MinValueValidator(1)]
+        validators=(MinValueValidator(MINIMUM_COOKING_TIME),)
     )
     created = models.DateTimeField(
         'Дата создания',
@@ -172,7 +154,7 @@ class RecipeIngredients(models.Model):
     amount = models.PositiveSmallIntegerField(
         verbose_name='Количество ингредиента в рецепте',
         help_text='Количество ингредиента в рецепте',
-        validators=[MinValueValidator(1)]
+        validators=(MinValueValidator(MINIMUM_AMOUNT_OF_INGREDIENT),)
     )
 
     class Meta:
@@ -213,37 +195,6 @@ class FavoritRecipes(models.Model):
 
     def __str__(self) -> str:
         return f'{self.recipe} в избранном у {self.user}'
-
-
-class Follow(models.Model):
-    """Модель для реализации функционала подписок."""
-    user = ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='follower',
-        verbose_name='Подписчик',
-        help_text='Подписчик'
-    )
-    author = ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='following',
-        verbose_name='Автор',
-        help_text='Автор рецепта'
-    )
-
-    class Meta:
-        verbose_name = 'Подписка'
-        verbose_name_plural = 'Подписки'
-        constraints = (
-            models.UniqueConstraint(
-                fields=('user', 'author'),
-                name='unique_follow'
-            ),
-        )
-
-    def __str__(self) -> str:
-        return f'Пользователь {self.user} подписан на автора {self.author}'
 
 
 class ShoppingCartRecipes(models.Model):

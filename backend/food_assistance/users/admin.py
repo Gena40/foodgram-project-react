@@ -1,5 +1,5 @@
 from django.contrib import admin
-from cookbook.models import Follow, User
+from users.models import Follow, User
 
 
 class UserAdmin(admin.ModelAdmin):

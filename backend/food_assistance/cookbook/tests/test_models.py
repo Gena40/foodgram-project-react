@@ -1,7 +1,8 @@
 from django.db.utils import DataError, IntegrityError
 from rest_framework.test import APITestCase
-from cookbook.models import (Follow, Ingredient, Recipe, RecipeIngredients,
-                             Tag, User)
+from users.models import Follow, User
+from cookbook.models import (Ingredient, Recipe, RecipeIngredients,
+                             Tag)
 
 from food_assistance.settings import MEDIA_ROOT
 

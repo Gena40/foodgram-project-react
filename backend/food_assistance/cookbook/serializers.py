@@ -4,6 +4,7 @@ from drf_extra_fields.fields import Base64ImageField
 from users.serializers import UserSerializer
 from cookbook.models import (Ingredient, Recipe, RecipeIngredients,
                              ShoppingCartRecipes, Tag)
+from food_assistance.settings import MINIMUM_AMOUNT_OF_INGREDIENT
 
 User = get_user_model()
 
@@ -230,9 +231,9 @@ class IngredientInCreateUpdateRecipeSerializer(serializers.ModelSerializer):
 
     def validate_amount(self, value):
         """
-        Проверка amount >= 1.
+        Проверка amount >= MINIMUM_AMOUNT_OF_INGREDIENT.
         """
-        if value < 1:
+        if value < MINIMUM_AMOUNT_OF_INGREDIENT:
             raise serializers.ValidationError(
                 detail='Amount of ingredients must be > 0'
             )
@@ -276,12 +277,12 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         empty_required_fields = dict()
-        required_fields = [
+        required_fields = (
             'ingredients', 'name', 'cooking_time', 'text', 'image', 'tags'
-        ]
+        )
         for field in required_fields:
             if validated_data.get(field) is None:
-                empty_required_fields[field] = ["This field is required."]
+                empty_required_fields[field] = "This field is required."
         if empty_required_fields:
             raise serializers.ValidationError(detail=empty_required_fields)
         instance.image = validated_data.get('image')
@@ -289,8 +290,6 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
         instance.text = validated_data.get('text')
         instance.cooking_time = validated_data.get('cooking_time')
         instance.tags.clear()
-        # print('self.initial_data =', self.initial_data)
-        # print('self.validated_data =', self.validated_data)
         tags_data = self.initial_data.get('tags')
         if tags_data:
             instance.tags.set(tags_data)
