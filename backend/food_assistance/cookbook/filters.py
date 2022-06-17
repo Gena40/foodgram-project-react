@@ -1,5 +1,5 @@
-from cookbook.models import Recipe
 from django_filters import FilterSet, rest_framework
+from cookbook.models import Recipe
 
 
 class RecipeFilter(FilterSet):

@@ -1,9 +1,9 @@
+from django.contrib.auth import get_user_model
+from rest_framework import serializers
+from drf_extra_fields.fields import Base64ImageField
+from users.serializers import UserSerializer
 from cookbook.models import (Ingredient, Recipe, RecipeIngredients,
                              ShoppingCartRecipes, Tag)
-from django.contrib.auth import get_user_model
-from drf_extra_fields.fields import Base64ImageField
-from rest_framework import serializers
-from users.serializers import UserSerializer
 
 User = get_user_model()
 

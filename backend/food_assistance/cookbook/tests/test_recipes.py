@@ -1,8 +1,8 @@
-from cookbook.models import (FavoritRecipes, Ingredient, Recipe,
-                             RecipeIngredients, Tag)
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
+from cookbook.models import (FavoritRecipes, Ingredient, Recipe,
+                             RecipeIngredients, Tag)
 
 User = get_user_model()
 
@@ -543,8 +543,8 @@ class GetPatchDelRecipeTests(APITestCase):
         Проверка удаления рецепта.
         """
         recipe_id = self.test_recipe.id
-        len_all_recipes_before = len(Recipe.objects.all())
+        len_all_recipes_before = Recipe.objects.all().count()
         response = self.auth_client.delete(f'/api/recipes/{recipe_id}/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        len_all_recipes_after = len(Recipe.objects.all())
+        len_all_recipes_after = Recipe.objects.all().count()
         self.assertNotEqual(len_all_recipes_before, len_all_recipes_after)

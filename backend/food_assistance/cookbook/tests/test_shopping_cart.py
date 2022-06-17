@@ -1,8 +1,8 @@
-from cookbook.models import (Ingredient, Recipe, RecipeIngredients,
-                             ShoppingCartRecipes, Tag)
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
+from cookbook.models import (Ingredient, Recipe, RecipeIngredients,
+                             ShoppingCartRecipes, Tag)
 
 User = get_user_model()
 
@@ -75,17 +75,17 @@ class ShoppingCartTests(APITestCase):
         """
         Проверка добавления рецепта в список покупок.
         """
-        len_shopping_cart_before = len(ShoppingCartRecipes.objects.filter(
+        len_shopping_cart_before = ShoppingCartRecipes.objects.filter(
             user=self.test_user
-        ).all())
+        ).all().count()
         recipe_id = self.test_recipe.id
         response = self.auth_client.post(
             f'/api/recipes/{recipe_id}/shopping_cart/'
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        len_shopping_cart_after = len(ShoppingCartRecipes.objects.filter(
+        len_shopping_cart_after = ShoppingCartRecipes.objects.filter(
             user=self.test_user
-        ).all())
+        ).all().count()
         self.assertNotEqual(len_shopping_cart_before, len_shopping_cart_after)
 
         response = self.auth_client.post(
@@ -111,17 +111,17 @@ class ShoppingCartTests(APITestCase):
             user=self.test_user,
             recipe=self.test_recipe2
         )
-        len_shopping_cart_before = len(ShoppingCartRecipes.objects.filter(
+        len_shopping_cart_before = ShoppingCartRecipes.objects.filter(
             user=self.test_user
-        ).all())
+        ).all().count()
         recipe_id = self.test_recipe2.id
         response = self.auth_client.delete(
             f'/api/recipes/{recipe_id}/shopping_cart/'
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        len_shopping_cart_after = len(ShoppingCartRecipes.objects.filter(
+        len_shopping_cart_after = ShoppingCartRecipes.objects.filter(
             user=self.test_user
-        ).all())
+        ).all().count()
         self.assertEqual(len_shopping_cart_before - 1, len_shopping_cart_after)
 
         response = self.auth_client.delete(

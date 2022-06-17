@@ -1,7 +1,7 @@
-from cookbook.models import FavoritRecipes, Recipe
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
+from cookbook.models import FavoritRecipes, Recipe
 
 User = get_user_model()
 
@@ -43,18 +43,23 @@ class FavoritRecipesTests(APITestCase):
         """
         Проверка добавления рецепта в избранное.
         """
-        len_favorit_recipes_before = len(FavoritRecipes.objects.filter(
+        len_favorit_recipes_before = FavoritRecipes.objects.filter(
             user=self.test_user
-        ))
+        ).count()
         recipe_id = self.test_recipe.id
         response = self.auth_client.post(f'/api/recipes/{recipe_id}/favorite/')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        len_favorit_recipes_after = len(FavoritRecipes.objects.filter(
+        favorit_recipes_after = FavoritRecipes.objects.filter(
             user=self.test_user
-        ))
+        )
+        len_favorit_recipes_after = favorit_recipes_after.count()
         self.assertNotEqual(
             len_favorit_recipes_before,
             len_favorit_recipes_after
+        )
+        self.assertEqual(
+            str(favorit_recipes_after[0]),
+            'Рецепт "test_recipe_name" автора author в избранном у test_user'
         )
 
     def test_add_into_favorites_twice(self):
@@ -77,22 +82,23 @@ class FavoritRecipesTests(APITestCase):
         Проверка удаления рецепта из избранного.
         """
         recipe_id = self.test_recipe.id
-        len_fav_recipes_before = len(FavoritRecipes.objects.filter(
+        len_fav_recipes_before = FavoritRecipes.objects.filter(
             user=self.test_user
-        ))
+        ).count()
+        self.assertEqual(len_fav_recipes_before, 0)
         response = self.auth_client.post(f'/api/recipes/{recipe_id}/favorite/')
-        len_fav_recipes_after_add = len(FavoritRecipes.objects.filter(
+        len_fav_recipes_after_add = FavoritRecipes.objects.filter(
             user=self.test_user
-        ))
-        self.assertNotEqual(len_fav_recipes_before, len_fav_recipes_after_add)
+        ).count()
+        self.assertEqual(len_fav_recipes_after_add, 1)
         response = self.auth_client.delete(
             f'/api/recipes/{recipe_id}/favorite/'
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        len_fav_recipes_after_del = len(FavoritRecipes.objects.filter(
+        len_fav_recipes_after_del = FavoritRecipes.objects.filter(
             user=self.test_user
-        ))
-        self.assertEqual(len_fav_recipes_before, len_fav_recipes_after_del)
+        ).count()
+        self.assertEqual(len_fav_recipes_after_del, 0)
 
     def test_favorites_not_exist(self):
         """

@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
-from djoser.serializers import SetPasswordSerializer
-from djoser.views import UserViewSet
 from rest_framework import permissions
 from rest_framework.exceptions import NotFound
+from djoser.serializers import SetPasswordSerializer
+from djoser.views import UserViewSet
 from users.pagination import CustomPagination
 from users.serializers import SpecialUserCreateSerializer, UserSerializer
 

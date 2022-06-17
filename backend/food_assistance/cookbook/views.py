@@ -1,12 +1,3 @@
-from cookbook.filters import RecipeFilter
-from cookbook.models import (FavoritRecipes, Follow, Ingredient, Recipe,
-                             RecipeIngredients, ShoppingCartRecipes, Tag)
-from cookbook.permissions import IsAuthor
-from cookbook.serializers import (DownloadShoppingCartSerializer,
-                                  FavoriteRecipesSerializer,
-                                  IngredientSerializer,
-                                  RecipesCreateSerializer, RecipesSerializer,
-                                  SbscrptSerializer, TagSerializer)
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError
 from django.http import HttpResponse
@@ -16,6 +7,15 @@ from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from users.pagination import CustomPagination
+from cookbook.filters import RecipeFilter
+from cookbook.models import (FavoritRecipes, Follow, Ingredient, Recipe,
+                             RecipeIngredients, ShoppingCartRecipes, Tag)
+from cookbook.permissions import IsAuthor
+from cookbook.serializers import (DownloadShoppingCartSerializer,
+                                  FavoriteRecipesSerializer,
+                                  IngredientSerializer,
+                                  RecipesCreateSerializer, RecipesSerializer,
+                                  SbscrptSerializer, TagSerializer)
 
 User = get_user_model()
 

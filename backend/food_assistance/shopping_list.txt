@@ -1,0 +1,2 @@
+ingr1_name (шт) - 10
+ingr2_name (кг) - 6

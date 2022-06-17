@@ -1,7 +1,8 @@
-from cookbook.models import Follow, Recipe
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
+from cookbook.models import Follow, Recipe
+
 
 User = get_user_model()
 

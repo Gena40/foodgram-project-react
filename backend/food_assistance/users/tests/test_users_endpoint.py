@@ -1,7 +1,7 @@
-from cookbook.models import Follow
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
+from cookbook.models import Follow
 
 User = get_user_model()
 
@@ -113,7 +113,7 @@ class ListUsersTests(APITestCase):
         response = self.auth_client.get(self.url + '?limit=5&page=1')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_dict = response.json()
-        self.assertEqual(len(all_users), self.number_of_test_users + 1)
+        self.assertEqual(all_users.count(), self.number_of_test_users + 1)
         self.assertEqual(
             response_dict.get('count'),
             self.number_of_test_users + 1

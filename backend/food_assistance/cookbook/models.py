@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models.fields.related import ForeignKey
+
 from food_assistance.settings import MEDIA_ROOT
 
 
@@ -12,9 +13,8 @@ def get_img_path(instanse, filename: str) -> str:
     """
     Возвращает путь до изображения для Recipe.image.
     """
-    timestamp: str = str(int(datetime.timestamp(datetime.now())))
-    img_path: str = os.path.join(MEDIA_ROOT, timestamp + filename)
-    return img_path
+    timestamp = str(int(datetime.timestamp(datetime.now())))
+    return os.path.join(MEDIA_ROOT, timestamp + filename)
 
 
 class User(AbstractUser):
@@ -212,7 +212,7 @@ class FavoritRecipes(models.Model):
         )
 
     def __str__(self) -> str:
-        return f'Рецепт {self.recipe} в избранном у {self.user}'
+        return f'{self.recipe} в избранном у {self.user}'
 
 
 class Follow(models.Model):
