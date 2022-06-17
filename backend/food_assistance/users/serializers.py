@@ -96,6 +96,13 @@ class SbscrptSerializer(serializers.ModelSerializer):
             'recipes_count'
         )
 
+    def validate(self, author_id):
+        current_user = self.context.get('current_user')
+        if current_user.id == author_id:
+            raise serializers.ValidationError(
+                detail={"errors": "You can't subscribe to yourself."}
+            )
+
     def get_recipes(self, obj):
         request = self.context.get('request')
         recipes_limit = self.context.get('recipes_limit')

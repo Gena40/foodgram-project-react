@@ -68,6 +68,11 @@ class ShoppingCartTests(APITestCase):
             cooking_time=25
         )
         self.test_recipe2.tags.add(self.tag1)
+        RecipeIngredients.objects.create(
+            recipe=self.test_recipe,
+            ingredient=self.test_ingr2,
+            amount=3
+        )
         self.auth_client = APIClient()
         self.auth_client.force_authenticate(user=self.test_user)
 
@@ -146,6 +151,10 @@ class ShoppingCartTests(APITestCase):
         ShoppingCartRecipes.objects.create(
             user=self.test_user,
             recipe=self.test_recipe
+        )
+        ShoppingCartRecipes.objects.create(
+            user=self.test_user,
+            recipe=self.test_recipe2
         )
         response = self.client.get('/api/recipes/download_shopping_cart/')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

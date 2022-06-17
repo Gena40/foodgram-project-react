@@ -1,15 +1,15 @@
 from django.contrib.auth import get_user_model
-from django.db import IntegrityError
+from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+
 from users.pagination import CustomPagination
-from users.models import Follow
-from users.serializers import SbscrptSerializer
 from cookbook.filters import RecipeFilter
+from users.models import Follow
 from cookbook.models import (FavoritRecipes, Ingredient, Recipe,
                              RecipeIngredients, ShoppingCartRecipes, Tag)
 from cookbook.permissions import IsAuthor
@@ -18,6 +18,7 @@ from cookbook.serializers import (DownloadShoppingCartSerializer,
                                   IngredientSerializer,
                                   RecipesCreateSerializer, RecipesSerializer,
                                   TagSerializer)
+from users.serializers import SbscrptSerializer
 
 User = get_user_model()
 
@@ -50,54 +51,48 @@ class SubscribeViewSet(viewsets.ViewSet):
     def create(self, request, *args, **kwargs):
         current_user = request.user
         author_id = int(kwargs.get('id'))
-        if current_user.id == author_id:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={'errors': "You can't subscribe to yourself."}
-            )
         author = get_object_or_404(User, id=author_id)
-        try:
-            Follow.objects.create(
-                user=current_user,
-                author=author
-            )
-        except IntegrityError:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={'errors': 'This subscription already exists.'}
-            )
-        serializer_context = {}
+        serializer_context = {'current_user': current_user}
         recipes_limit = request.query_params.get('recipes_limit')
         if recipes_limit:
             serializer_context['recipes_limit'] = recipes_limit
         serializer = SbscrptSerializer(
             author,
-            context=serializer_context)
+            context=serializer_context
+        )
+        serializer.validate(author_id)
+        follow, not_exists = Follow.objects.get_or_create(
+            user=current_user,
+            author=author
+        )
+        if not not_exists:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={'errors': 'This subscription already exists.'}
+            )
         return Response(
             serializer.data,
             status=status.HTTP_201_CREATED,
         )
 
-    @action(methods=['delete'], detail=False)
+    @action(methods=('delete',), detail=False)
     def delete(self, request, id=None):
         current_user = request.user
-        if current_user.id == int(id):
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={'errors': "You can't subscribe to yourself."}
-            )
+        serializer_context = {'current_user': current_user}
         author = get_object_or_404(User, id=id)
-        try:
-            follow = Follow.objects.get(
-                user=current_user,
-                author=author
-            )
-        except Exception:
+        serializer = SbscrptSerializer(
+            author,
+            context=serializer_context
+        )
+        serializer.validate(int(id))
+        if not Follow.objects.filter(user=current_user,
+                                     author=author).exists():
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
                 data={'errors': 'Subscription does not exist.'}
             )
-        follow.delete()
+        Follow.objects.get(user=current_user,
+                           author=author).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -107,12 +102,11 @@ class FavoriteRecipesViewSet(viewsets.ViewSet):
     def create(self, request, id=None):
         current_user = request.user
         favorite_recipe = get_object_or_404(Recipe, id=id)
-        try:
-            FavoritRecipes.objects.create(
-                user=current_user,
-                recipe=favorite_recipe
-            )
-        except IntegrityError:
+        fav, not_exists = FavoritRecipes.objects.get_or_create(
+            user=current_user,
+            recipe=favorite_recipe
+        )
+        if not not_exists:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
                 data={'errors': 'Recipe already in favorites.'}
@@ -123,28 +117,22 @@ class FavoriteRecipesViewSet(viewsets.ViewSet):
             status=status.HTTP_201_CREATED
         )
 
-    @action(methods=['delete'], detail=False)
+    @action(methods=('delete',), detail=False)
     def delete(self, request, id=None):
         current_user = request.user
         favorite_recipe = get_object_or_404(Recipe, id=id)
-        try:
-            favorite_recipe_db = FavoritRecipes.objects.get(
-                user=current_user,
-                recipe=favorite_recipe
-            )
-        except Exception:
+        if not FavoritRecipes.objects.filter(user=current_user,
+                                             recipe=favorite_recipe).exists():
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
                 data={'errors': 'Recipe not in favorites.'}
             )
-        favorite_recipe_db.delete()
+        FavoritRecipes.objects.get(user=current_user,
+                                   recipe=favorite_recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
-    queryset = Recipe.objects.all()
-    serializer_class = RecipesSerializer
-    permission_classes = (permissions.AllowAny,)
     pagination_class = CustomPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
@@ -154,7 +142,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
             return (permissions.IsAuthenticated(),)
         if self.action == 'partial_update':
             return (IsAuthor(),)
-        return super().get_permissions()
+        return (permissions.AllowAny(),)
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'partial_update':
@@ -170,7 +158,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
                 return Recipe.objects.exclude(
                     favorit_recipe__user=self.request.user
                 )
-        return super().get_queryset()
+        return Recipe.objects.all()
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -199,12 +187,11 @@ class ShoppingCartViewSet(viewsets.ModelViewSet):
     def create(self, request, id=None):
         current_user = request.user
         recipe_for_cart = get_object_or_404(Recipe, id=id)
-        try:
-            ShoppingCartRecipes.objects.create(
-                user=current_user,
-                recipe=recipe_for_cart
-            )
-        except IntegrityError:
+        recipe, not_exists = ShoppingCartRecipes.objects.get_or_create(
+            user=current_user,
+            recipe=recipe_for_cart
+        )
+        if not not_exists:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
                 data={'errors': 'Recipe already in shopping cart.'}
@@ -215,21 +202,18 @@ class ShoppingCartViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED
         )
 
-    @action(methods=['delete'], detail=False)
+    @action(methods=('delete',), detail=False)
     def delete(self, request, id=None):
         current_user = request.user
         recipe = get_object_or_404(Recipe, id=id)
-        try:
-            recipe_in_cart = ShoppingCartRecipes.objects.get(
-                user=current_user,
-                recipe=recipe
-            )
-        except Exception:
+        if not ShoppingCartRecipes.objects.filter(user=current_user,
+                                                  recipe=recipe).exists():
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
                 data={'errors': 'Recipe not in shopping cart.'}
             )
-        recipe_in_cart.delete()
+        ShoppingCartRecipes.objects.get(user=current_user,
+                                        recipe=recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -242,31 +226,32 @@ class DownloadShoppingCartViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated,)
 
     def list(self, request, *args, **kwargs):
-        resipes_in_cart = request.user.shopping_cart_recipes.all()
-        if not resipes_in_cart:
+        all_ingr_in_cart = RecipeIngredients.objects.filter(
+            recipe__cart_recipe__user=request.user).all()
+        if not all_ingr_in_cart:
             return Response(status=status.HTTP_204_NO_CONTENT)
         ingredients_dict = dict()
-        for recipe in resipes_in_cart:
-            for ingr_in_recipe in RecipeIngredients.objects.filter(
-                recipe=recipe
-            ).all():
-                inrg_name = ingr_in_recipe.ingredient.name
-                if inrg_name not in ingredients_dict:
-                    ingredients_dict[inrg_name] = [
-                        ingr_in_recipe.amount,
-                        ingr_in_recipe.ingredient.measurement_unit
-                    ]
-                else:
-                    ingredients_dict[inrg_name][0] += ingr_in_recipe.amount
-        with open('shopping_list.txt', 'w', encoding='utf-8') as file:
-            for ingr in ingredients_dict:
-                amount = ingredients_dict[ingr][0]
-                unit = ingredients_dict[ingr][1]
-                row = f'{ingr} ({unit}) - {amount}\n'
-                file.write(row)
-        with open('shopping_list.txt', 'r', encoding='utf-8') as file:
-            response = HttpResponse(file, content_type='text')
-            response['Content-Disposition'] = (
-                'attachment; filename=shopping_list.txt'
+        for ingr_dict in all_ingr_in_cart.values('ingredient').distinct():
+            ingredient = get_object_or_404(
+                Ingredient,
+                id=ingr_dict.get('ingredient')
             )
-            return response
+            ingredients_dict[ingredient.name] = (
+                all_ingr_in_cart.filter(
+                    ingredient=ingredient
+                ).aggregate(Sum('amount')).get('amount__sum'),
+                ingredient.measurement_unit
+            )
+
+        ingredients_list = []
+        for ingr in ingredients_dict:
+            amount = ingredients_dict[ingr][0]
+            unit = ingredients_dict[ingr][1]
+            row = f'{ingr} ({unit}) - {amount}'
+            ingredients_list.append(row)
+        response = HttpResponse(content_type='text')
+        response.write('\n'.join(ingredients_list))
+        response['Content-Disposition'] = (
+            'attachment; filename=shopping_list.txt'
+        )
+        return response

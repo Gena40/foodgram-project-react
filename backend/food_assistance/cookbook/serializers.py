@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from rest_framework import serializers
 from drf_extra_fields.fields import Base64ImageField
 from users.serializers import UserSerializer
@@ -205,6 +206,7 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
             'cooking_time'
         )
 
+    @transaction.atomic
     def create(self, validated_data):
         request = self.context.get('request')
         validated_data['author'] = request.user
@@ -221,6 +223,7 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
             )
         return recipe
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         empty_required_fields = dict()
         required_fields = (
