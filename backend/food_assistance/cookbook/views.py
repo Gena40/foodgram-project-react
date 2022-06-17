@@ -8,6 +8,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from users.pagination import CustomPagination
 from users.models import Follow
+from users.serializers import SbscrptSerializer
 from cookbook.filters import RecipeFilter
 from cookbook.models import (FavoritRecipes, Ingredient, Recipe,
                              RecipeIngredients, ShoppingCartRecipes, Tag)
@@ -16,7 +17,7 @@ from cookbook.serializers import (DownloadShoppingCartSerializer,
                                   FavoriteRecipesSerializer,
                                   IngredientSerializer,
                                   RecipesCreateSerializer, RecipesSerializer,
-                                  SbscrptSerializer, TagSerializer)
+                                  TagSerializer)
 
 User = get_user_model()
 
@@ -94,7 +95,7 @@ class SubscribeViewSet(viewsets.ViewSet):
         except Exception:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
-                data={'errors': "Subscription does not exist."}
+                data={'errors': 'Subscription does not exist.'}
             )
         follow.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -114,7 +115,7 @@ class FavoriteRecipesViewSet(viewsets.ViewSet):
         except IntegrityError:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
-                data={'errors': "Recipe already in favorites."}
+                data={'errors': 'Recipe already in favorites.'}
             )
         serializer = FavoriteRecipesSerializer(favorite_recipe)
         return Response(
@@ -134,7 +135,7 @@ class FavoriteRecipesViewSet(viewsets.ViewSet):
         except Exception:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
-                data={'errors': "Recipe not in favorites."}
+                data={'errors': 'Recipe not in favorites.'}
             )
         favorite_recipe_db.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -206,7 +207,7 @@ class ShoppingCartViewSet(viewsets.ModelViewSet):
         except IntegrityError:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
-                data={'errors': "Recipe already in shopping cart."}
+                data={'errors': 'Recipe already in shopping cart.'}
             )
         serializer = FavoriteRecipesSerializer(recipe_for_cart)
         return Response(
@@ -226,7 +227,7 @@ class ShoppingCartViewSet(viewsets.ModelViewSet):
         except Exception:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
-                data={'errors': "Recipe not in shopping cart."}
+                data={'errors': 'Recipe not in shopping cart.'}
             )
         recipe_in_cart.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

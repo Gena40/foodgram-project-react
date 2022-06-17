@@ -22,7 +22,7 @@ class SpecialUserViewSet(UserViewSet):
     pagination_class = CustomPagination
 
     def get_queryset(self):
-        if self.action == "list":
+        if self.action == 'list':
             return User.objects.all()
         if self.action == 'retrieve':
             return User.objects.all()

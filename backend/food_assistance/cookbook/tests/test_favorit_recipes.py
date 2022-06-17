@@ -9,18 +9,18 @@ User = get_user_model()
 class FavoritRecipesTests(APITestCase):
     def setUp(self) -> None:
         self.test_user = User.objects.create(
-            email="test_user@yandex.ru",
-            username="test_user",
-            first_name="test_user_name",
-            last_name="test_user_family",
-            password="Test**Qwerty123"
+            email='test_user@yandex.ru',
+            username='test_user',
+            first_name='test_user_name',
+            last_name='test_user_family',
+            password='Test**Qwerty123'
         )
         self.author = User.objects.create(
-            email="author@yandex.ru",
-            username="author",
-            first_name="author_name",
-            last_name="author_family",
-            password="Author**Qwerty123"
+            email='author@yandex.ru',
+            username='author',
+            first_name='author_name',
+            last_name='author_family',
+            password='Author**Qwerty123'
         )
         self.test_recipe = Recipe.objects.create(
             author=self.author,
@@ -74,7 +74,7 @@ class FavoritRecipesTests(APITestCase):
         response_dict = response.json()
         self.assertEqual(
             response_dict.get('errors'),
-            "Recipe already in favorites."
+            'Recipe already in favorites.'
         )
 
     def test_del_from_favorites(self):
@@ -113,5 +113,5 @@ class FavoritRecipesTests(APITestCase):
         response_dict = response.json()
         self.assertEqual(
             response_dict.get('errors'),
-            "Recipe not in favorites."
+            'Recipe not in favorites.'
         )

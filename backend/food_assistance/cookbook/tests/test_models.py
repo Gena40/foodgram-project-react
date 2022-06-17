@@ -12,18 +12,18 @@ class StrModelsTest(APITestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = User.objects.create_user(
-            email="vpupkin@yandex.ru",
-            username="vasya",
-            first_name="Вася",
-            last_name="Пупкин",
-            password="123**Qwerty123"
+            email='vpupkin@yandex.ru',
+            username='vasya',
+            first_name='Вася',
+            last_name='Пупкин',
+            password='123**Qwerty123'
         )
         cls.author = User.objects.create_user(
-            email="author@yandex.ru",
-            username="author",
-            first_name="Автор",
-            last_name="Шеф",
-            password="123**sheff!"
+            email='author@yandex.ru',
+            username='author',
+            first_name='Автор',
+            last_name='Шеф',
+            password='123**sheff!'
         )
         cls.follow = Follow.objects.create(
             user=cls.user,

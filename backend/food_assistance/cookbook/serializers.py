@@ -4,7 +4,7 @@ from drf_extra_fields.fields import Base64ImageField
 from users.serializers import UserSerializer
 from cookbook.models import (Ingredient, Recipe, RecipeIngredients,
                              ShoppingCartRecipes, Tag)
-from food_assistance.settings import MINIMUM_AMOUNT_OF_INGREDIENT
+from food_assistance.settings import MINIMUM_AMOUNT_OF_INGREDIENT as MIN_AMOUNT
 
 User = get_user_model()
 
@@ -40,10 +40,18 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
     """
     Serializer для просмотра ингредиентов в составе рецепта.
     """
-    id = serializers.SerializerMethodField()
-    name = serializers.SerializerMethodField()
-    measurement_unit = serializers.SerializerMethodField()
-    amount = serializers.SerializerMethodField()
+    id = serializers.SerializerMethodField(
+        method_name='get_id'
+    )
+    name = serializers.SerializerMethodField(
+        method_name='get_name'
+    )
+    measurement_unit = serializers.SerializerMethodField(
+        method_name='get_measurement_unit'
+    )
+    amount = serializers.SerializerMethodField(
+        method_name='get_amount'
+    )
 
     class Meta:
         model = RecipeIngredients
@@ -79,74 +87,6 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
         return obj.amount
 
 
-class RecipesSimpleSerializer(serializers.ModelSerializer):
-    """
-    Serializer для поля recipes в SbscrptSerializer.
-    """
-    class Meta:
-        model = Recipe
-        fields = (
-            'id',
-            'name',
-            'image',
-            'cooking_time'
-        )
-
-
-class SbscrptSerializer(serializers.ModelSerializer):
-    """
-    Serializer для просмотра информации о подписках.
-    """
-    is_subscribed = serializers.SerializerMethodField()
-    recipes_count = serializers.SerializerMethodField()
-    recipes = serializers.SerializerMethodField()
-
-    class Meta:
-        model = User
-        fields = (
-            'email',
-            'id',
-            'username',
-            'first_name',
-            'last_name',
-            'is_subscribed',
-            'recipes',
-            'recipes_count'
-        )
-
-    def get_recipes(self, obj):
-        request = self.context.get('request')
-        recipes_limit = self.context.get('recipes_limit')
-        if not recipes_limit and request:
-            recipes_limit = request.query_params.get('recipes_limit')
-        obj_recipes = obj.recipes.all()
-        if recipes_limit is not None:
-            recipes_limit = int(recipes_limit)
-            if recipes_limit >= 0:
-                obj_recipes = obj_recipes[:recipes_limit]
-        return RecipesSimpleSerializer(instance=obj_recipes, many=True).data
-
-    def get_is_subscribed(self, obj) -> bool:
-        """
-        Проверка подписан ли текущий пользователь на obj.
-        """
-        current_user = None
-        request = self.context.get('request')
-        if not request:
-            return True
-        if request and hasattr(request, 'user'):
-            current_user = request.user
-        if request.user.is_authenticated:
-            return obj.following.filter(user=current_user).exists()
-        return False
-
-    def get_recipes_count(self, obj) -> int:
-        """
-        Возвращает число рецептов пользователя.
-        """
-        return len(obj.recipes.all())
-
-
 class FavoriteRecipesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
@@ -161,9 +101,15 @@ class FavoriteRecipesSerializer(serializers.ModelSerializer):
 class RecipesSerializer(serializers.ModelSerializer):
     tags = TagSerializer(read_only=True, many=True)
     author = UserSerializer(read_only=True)
-    ingredients = serializers.SerializerMethodField()
-    is_favorited = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
+    ingredients = serializers.SerializerMethodField(
+        method_name='get_ingredients'
+    )
+    is_favorited = serializers.SerializerMethodField(
+        method_name='get_is_favorited'
+    )
+    is_in_shopping_cart = serializers.SerializerMethodField(
+        method_name='get_is_in_shopping_cart'
+    )
 
     class Meta:
         model = Recipe
@@ -233,9 +179,9 @@ class IngredientInCreateUpdateRecipeSerializer(serializers.ModelSerializer):
         """
         Проверка amount >= MINIMUM_AMOUNT_OF_INGREDIENT.
         """
-        if value < MINIMUM_AMOUNT_OF_INGREDIENT:
+        if value < MIN_AMOUNT:
             raise serializers.ValidationError(
-                detail='Amount of ingredients must be > 0'
+                detail=f'Amount of ingredients should not be < {MIN_AMOUNT}'
             )
         return value
 
@@ -282,7 +228,7 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
         )
         for field in required_fields:
             if validated_data.get(field) is None:
-                empty_required_fields[field] = "This field is required."
+                empty_required_fields[field] = 'This field is required.'
         if empty_required_fields:
             raise serializers.ValidationError(detail=empty_required_fields)
         instance.image = validated_data.get('image')

@@ -11,25 +11,25 @@ User = get_user_model()
 class MyFollowsTests(APITestCase):
     def setUp(self) -> None:
         self.follower = User.objects.create(
-            email="follower@yandex.ru",
-            username="follower",
-            first_name="follower_name",
-            last_name="follower_family",
-            password="Follower**Qwerty123"
+            email='follower@yandex.ru',
+            username='follower',
+            first_name='follower_name',
+            last_name='follower_family',
+            password='Follower**Qwerty123'
         )
         self.test_user = User.objects.create(
-            email="test_user@yandex.ru",
-            username="test_user",
-            first_name="test_user_name",
-            last_name="test_user_family",
-            password="Test**Qwerty123"
+            email='test_user@yandex.ru',
+            username='test_user',
+            first_name='test_user_name',
+            last_name='test_user_family',
+            password='Test**Qwerty123'
         )
         self.author = User.objects.create(
-            email="author@yandex.ru",
-            username="author",
-            first_name="author_name",
-            last_name="author_family",
-            password="Author**Qwerty123"
+            email='author@yandex.ru',
+            username='author',
+            first_name='author_name',
+            last_name='author_family',
+            password='Author**Qwerty123'
         )
         self.test_recipe = Recipe.objects.create(
             author=self.author,
@@ -105,25 +105,25 @@ class MyFollowsTests(APITestCase):
 class SubscribeTests(APITestCase):
     def setUp(self) -> None:
         self.follower = User.objects.create(
-            email="follower@yandex.ru",
-            username="follower",
-            first_name="follower_name",
-            last_name="follower_family",
-            password="Follower**Qwerty123"
+            email='follower@yandex.ru',
+            username='follower',
+            first_name='follower_name',
+            last_name='follower_family',
+            password='Follower**Qwerty123'
         )
         self.test_user = User.objects.create(
-            email="test_user@yandex.ru",
-            username="test_user",
-            first_name="test_user_name",
-            last_name="test_user_family",
-            password="Test**Qwerty123"
+            email='test_user@yandex.ru',
+            username='test_user',
+            first_name='test_user_name',
+            last_name='test_user_family',
+            password='Test**Qwerty123'
         )
         self.author = User.objects.create(
-            email="author@yandex.ru",
-            username="author",
-            first_name="author_name",
-            last_name="author_family",
-            password="Author**Qwerty123"
+            email='author@yandex.ru',
+            username='author',
+            first_name='author_name',
+            last_name='author_family',
+            password='Author**Qwerty123'
         )
         self.test_recipe = Recipe.objects.create(
             author=self.author,
@@ -176,7 +176,7 @@ class SubscribeTests(APITestCase):
         response_dict = response.json()
         self.assertEqual(
             response_dict.get('errors'),
-            "This subscription already exists."
+            'This subscription already exists.'
         )
 
     def test_unsubscribe(self):
@@ -224,5 +224,5 @@ class SubscribeTests(APITestCase):
         response_dict = response.json()
         self.assertEqual(
             response_dict.get('errors'),
-            "Subscription does not exist."
+            'Subscription does not exist.'
         )

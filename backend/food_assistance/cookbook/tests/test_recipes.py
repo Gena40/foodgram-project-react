@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
+from food_assistance.settings import MINIMUM_AMOUNT_OF_INGREDIENT as MIN_AMOUNT
 from cookbook.models import (FavoritRecipes, Ingredient, Recipe,
                              RecipeIngredients, Tag)
 
@@ -10,18 +11,18 @@ User = get_user_model()
 class RecipesListTests(APITestCase):
     def setUp(self) -> None:
         self.test_user = User.objects.create(
-            email="test_user@yandex.ru",
-            username="test_user",
-            first_name="test_user_name",
-            last_name="test_user_family",
-            password="Test**Qwerty123"
+            email='test_user@yandex.ru',
+            username='test_user',
+            first_name='test_user_name',
+            last_name='test_user_family',
+            password='Test**Qwerty123'
         )
         self.author = User.objects.create(
-            email="author@yandex.ru",
-            username="author",
-            first_name="author_name",
-            last_name="author_family",
-            password="Author**Qwerty123"
+            email='author@yandex.ru',
+            username='author',
+            first_name='author_name',
+            last_name='author_family',
+            password='Author**Qwerty123'
         )
         self.tag1 = Tag.objects.create(
             name='tag1_name',
@@ -203,11 +204,11 @@ class RecipesListTests(APITestCase):
 class CreateRecipeTests(APITestCase):
     def setUp(self) -> None:
         self.test_user = User.objects.create(
-            email="test_user@yandex.ru",
-            username="test_user",
-            first_name="test_user_name",
-            last_name="test_user_family",
-            password="Test**Qwerty123"
+            email='test_user@yandex.ru',
+            username='test_user',
+            first_name='test_user_name',
+            last_name='test_user_family',
+            password='Test**Qwerty123'
         )
         self.tag1 = Tag.objects.create(
             name='tag1_name',
@@ -340,18 +341,18 @@ class CreateRecipeTests(APITestCase):
 class GetPatchDelRecipeTests(APITestCase):
     def setUp(self) -> None:
         self.test_user = User.objects.create(
-            email="test_user@yandex.ru",
-            username="test_user",
-            first_name="test_user_name",
-            last_name="test_user_family",
-            password="Test**Qwerty123"
+            email='test_user@yandex.ru',
+            username='test_user',
+            first_name='test_user_name',
+            last_name='test_user_family',
+            password='Test**Qwerty123'
         )
         self.test_user2 = User.objects.create(
-            email="test_user2@yandex.ru",
-            username="test_user2",
-            first_name="test_user2_name",
-            last_name="test_user2_family",
-            password="Test**Qwerty123"
+            email='test_user2@yandex.ru',
+            username='test_user2',
+            first_name='test_user2_name',
+            last_name='test_user2_family',
+            password='Test**Qwerty123'
         )
         self.tag1 = Tag.objects.create(
             name='tag1_name',
@@ -442,16 +443,16 @@ class GetPatchDelRecipeTests(APITestCase):
                     'amount': 100
                 }
             ],
-            "tags": [
+            'tags': [
                 self.tag2.id
             ],
-            "image": ('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAA'
+            'image': ('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAA'
                       'BAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMA'
                       'AA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJR'
                       'U5ErkJggg=='),
-            "name": "updating_name",
-            "text": "updating_text",
-            "cooking_time": 60
+            'name': 'updating_name',
+            'text': 'updating_text',
+            'cooking_time': 60
         }
         recipe_id = self.test_recipe2.id
         response = self.auth_client.patch(
@@ -489,14 +490,14 @@ class GetPatchDelRecipeTests(APITestCase):
                     'amount': 0
                 }
             ],
-            "tags": [],
-            "image": ('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAA'
+            'tags': [],
+            'image': ('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAA'
                       'BAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMA'
                       'AA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJR'
                       'U5ErkJggg=='),
-            "name": "new_name",
-            "text": "new_text",
-            "cooking_time": 30
+            'name': 'new_name',
+            'text': 'new_text',
+            'cooking_time': 30
         }
         recipe_id = self.test_recipe2.id
         response = self.auth_client.patch(
@@ -508,7 +509,7 @@ class GetPatchDelRecipeTests(APITestCase):
         self.assertEqual(type(response_dict.get('ingredients')), type([]))
         self.assertEqual(
             response_dict.get('ingredients')[0].get('amount'),
-            ['Amount of ingredients must be > 0']
+            [f'Amount of ingredients should not be < {MIN_AMOUNT}']
         )
 
     def test_update_permission_error_recipe(self):
@@ -522,14 +523,14 @@ class GetPatchDelRecipeTests(APITestCase):
                     'amount': 1
                 }
             ],
-            "tags": [],
-            "image": ('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAA'
+            'tags': [],
+            'image': ('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAA'
                       'BAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMA'
                       'AA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJR'
                       'U5ErkJggg=='),
-            "name": "new_name",
-            "text": "new_text",
-            "cooking_time": 30
+            'name': 'new_name',
+            'text': 'new_text',
+            'cooking_time': 30
         }
         recipe_id = self.test_recipe2.id
         response = self.auth_client2.patch(

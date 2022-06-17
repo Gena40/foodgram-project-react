@@ -10,18 +10,18 @@ User = get_user_model()
 class ShoppingCartTests(APITestCase):
     def setUp(self) -> None:
         self.test_user = User.objects.create(
-            email="test_user@yandex.ru",
-            username="test_user",
-            first_name="test_user_name",
-            last_name="test_user_family",
-            password="Test**Qwerty123"
+            email='test_user@yandex.ru',
+            username='test_user',
+            first_name='test_user_name',
+            last_name='test_user_family',
+            password='Test**Qwerty123'
         )
         self.author = User.objects.create(
-            email="author@yandex.ru",
-            username="author",
-            first_name="author_name",
-            last_name="author_family",
-            password="Author**Qwerty123"
+            email='author@yandex.ru',
+            username='author',
+            first_name='author_name',
+            last_name='author_family',
+            password='Author**Qwerty123'
         )
         self.tag1 = Tag.objects.create(
             name='tag1_name',
