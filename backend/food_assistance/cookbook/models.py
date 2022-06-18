@@ -11,7 +11,7 @@ from food_assistance.settings import (MEDIA_ROOT,
 from users.models import User
 
 
-def get_img_path(instanse, filename: str) -> str:
+def get_img_path(instanse: 'Recipe', filename: str) -> str:
     """
     Возвращает путь до изображения для Recipe.image.
     """

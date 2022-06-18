@@ -126,11 +126,11 @@ class SbscrptSerializer(serializers.ModelSerializer):
         if request and hasattr(request, 'user'):
             current_user = request.user
         if request.user.is_authenticated:
-            return obj.following.filter(user=current_user).exists()
+            return current_user.follower.filter(author=obj).exists()
         return False
 
     def get_recipes_count(self, obj) -> int:
         """
         Возвращает число рецептов пользователя.
         """
-        return len(obj.recipes.all())
+        return obj.recipes.all().count()

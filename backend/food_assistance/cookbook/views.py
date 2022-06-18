@@ -227,27 +227,20 @@ class DownloadShoppingCartViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         all_ingr_in_cart = RecipeIngredients.objects.filter(
-            recipe__cart_recipe__user=request.user).all()
+            recipe__cart_recipe__user=request.user).values(
+                'ingredient').annotate(Sum('amount'))
         if not all_ingr_in_cart:
             return Response(status=status.HTTP_204_NO_CONTENT)
-        ingredients_dict = dict()
-        for ingr_dict in all_ingr_in_cart.values('ingredient').distinct():
+        ingredients_list = []
+        for ingr in all_ingr_in_cart:
+            amount = ingr.get('amount__sum')
             ingredient = get_object_or_404(
                 Ingredient,
-                id=ingr_dict.get('ingredient')
+                id=ingr.get('ingredient')
             )
-            ingredients_dict[ingredient.name] = (
-                all_ingr_in_cart.filter(
-                    ingredient=ingredient
-                ).aggregate(Sum('amount')).get('amount__sum'),
-                ingredient.measurement_unit
-            )
-
-        ingredients_list = []
-        for ingr in ingredients_dict:
-            amount = ingredients_dict[ingr][0]
-            unit = ingredients_dict[ingr][1]
-            row = f'{ingr} ({unit}) - {amount}'
+            unit = ingredient.measurement_unit
+            name = ingredient.name
+            row = f'{name} ({unit}) - {amount}'
             ingredients_list.append(row)
         response = HttpResponse(content_type='text')
         response.write('\n'.join(ingredients_list))
