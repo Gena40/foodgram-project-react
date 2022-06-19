@@ -14,11 +14,10 @@ import os
 
 from dotenv import load_dotenv
 
-load_dotenv()
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(BASE_DIR)), 'infra/.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -34,6 +33,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     '[::1]',
     'testserver',
+    '130.193.41.135'
 ]
 
 
@@ -159,9 +159,8 @@ MEDIA_ROOT = os.path.join(os.path.dirname(os.path.dirname(BASE_DIR)), 'data/medi
 
 # STATIC_URL = '/static/'
 
-# STATICFILES_DIRS = (
-#         os.path.join(BASE_DIR, 'static'),
-# )
+# STATICFILES_DIRS = (os.path.join(os.path.dirname(os.path.dirname(BASE_DIR)), 'staticfiles/'),)
+
 # STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MINIMUM_AMOUNT_OF_INGREDIENT = 1
