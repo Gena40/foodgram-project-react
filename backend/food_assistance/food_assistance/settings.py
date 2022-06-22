@@ -157,11 +157,11 @@ MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(os.path.dirname(os.path.dirname(BASE_DIR)), 'data/media/')
 
-# STATIC_URL = '/static/'
+STATIC_URL = '/static/'
 
-# STATICFILES_DIRS = (os.path.join(os.path.dirname(os.path.dirname(BASE_DIR)), 'staticfiles/'),)
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'docs'),)
 
-# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MINIMUM_AMOUNT_OF_INGREDIENT = 1
 
