@@ -3,7 +3,7 @@ from cookbook.models import Recipe
 
 
 class RecipeFilter(FilterSet):
-    tags = rest_framework.CharFilter(
+    tags = rest_framework.MultipleChoiceFilter(
         field_name='tags__slug',
     )
 

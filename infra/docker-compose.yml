@@ -2,16 +2,20 @@ version: '3.3'
 services:
   cookbook_db:
     image: postgres:13.0-alpine
+    restart: always
     volumes:
       - db-data:/var/lib/postgresql/data/
     env_file:
       - ./.env
   backend:
-    image: gena40/food_assistance:latest
+    # image: gena40/food_assistance:latest
+    build:
+      context: ../backend/food_assistance
+      dockerfile: Dockerfile
     restart: always
     volumes:
       - static_files:/app/static_web/
-      - media_files:/app/media/
+      - media_files:/media/
     depends_on:
       - cookbook_db
     env_file:
@@ -30,13 +34,12 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ../frontend/build:/usr/share/nginx/html/
       - ../docs/:/usr/share/nginx/html/api/docs/
-      # - :/var/html/static/
       - static_files:/var/html/static/
       - media_files:/var/html/media/
     depends_on:
       - backend
 
 volumes:
-  db-data:
-  static_files:
-  media_files:
+  db-data: {}
+  static_files: {}
+  media_files: {}

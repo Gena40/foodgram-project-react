@@ -1,12 +1,10 @@
-import os
 from datetime import datetime
 
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models.fields.related import ForeignKey
 
-from food_assistance.settings import (MEDIA_ROOT,
-                                      MINIMUM_AMOUNT_OF_INGREDIENT,
+from food_assistance.settings import (MINIMUM_AMOUNT_OF_INGREDIENT,
                                       MINIMUM_COOKING_TIME)
 from users.models import User
 
@@ -16,7 +14,7 @@ def get_img_path(instanse: 'Recipe', filename: str) -> str:
     Возвращает путь до изображения для Recipe.image.
     """
     timestamp = str(int(datetime.timestamp(datetime.now())))
-    return os.path.join(MEDIA_ROOT, timestamp + filename)
+    return timestamp + filename
 
 
 class Tag(models.Model):
