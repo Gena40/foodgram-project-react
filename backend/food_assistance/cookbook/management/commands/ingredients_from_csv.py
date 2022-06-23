@@ -30,7 +30,7 @@ LOG_STATUS = {
 
 class Command(BaseCommand):
     help = 'Копирование ингредиентов из csv'
-    shift_path = os.path.join(BASE_DIR, 'static')
+    shift_path = os.path.join(BASE_DIR, 'static_web')
 
     def add_arguments(self, parser) -> None:
         parser.add_argument(

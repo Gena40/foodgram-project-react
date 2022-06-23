@@ -92,7 +92,7 @@ WSGI_APPLICATION = 'food_assistance.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
-        'NAME': os.getenv('DB_NAME', default='postgres'),
+        'NAME': os.getenv('POSTGRES_DB', default='postgres'),
         'USER': os.getenv('POSTGRES_USER', default='postgres'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='qwerty123'),
         'HOST': os.getenv('DB_HOST', default='db'),
@@ -155,13 +155,13 @@ AUTH_USER_MODEL = 'users.User'
 
 MEDIA_URL = '/media/'
 
-MEDIA_ROOT = os.path.join(os.path.dirname(os.path.dirname(BASE_DIR)), 'data/media/')
+MEDIA_ROOT = os.path.join(os.path.dirname(os.path.dirname(BASE_DIR)), 'media')
 
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'docs'),)
+# STATICFILES_DIRS = (os.path.join(BASE_DIR, 'docs'),)
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_web')
 
 MINIMUM_AMOUNT_OF_INGREDIENT = 1
 
