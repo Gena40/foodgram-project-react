@@ -8,10 +8,7 @@ services:
     env_file:
       - ./.env
   backend:
-    # image: gena40/food_assistance:latest
-    build:
-      context: ../backend/food_assistance
-      dockerfile: Dockerfile
+    image: gena40/food_assistance:latest
     restart: always
     volumes:
       - static_files:/app/static_web/

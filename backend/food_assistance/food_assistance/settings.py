@@ -16,7 +16,6 @@ from dotenv import load_dotenv
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-print('BASE_DIR =', BASE_DIR)
 
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(BASE_DIR)), 'infra/.env'))
 
@@ -157,14 +156,10 @@ AUTH_USER_MODEL = 'users.User'
 MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(os.path.dirname(os.path.dirname(BASE_DIR)), 'media')
-print('MEDIA_ROOT =', MEDIA_ROOT)
 
 STATIC_URL = '/static/'
 
-# STATICFILES_DIRS = (os.path.join(BASE_DIR, 'docs'),)
-
 STATIC_ROOT = os.path.join(BASE_DIR, 'static_web')
-print('STATIC_ROOT =', STATIC_ROOT)
 
 MINIMUM_AMOUNT_OF_INGREDIENT = 1
 
