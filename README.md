@@ -1,7 +1,7 @@
 # Foodgram «Продуктовый помощник»
 ## Проект Foodgram это онлайн-сервис с API, с помощью которого пользователи смогут публиковать рецепты, подписываться на публикации других пользователей, добавлять понравившиеся рецепты в список «Избранное», а перед походом в магазин скачивать сводный список продуктов, необходимых для приготовления одного или нескольких выбранных блюд.
 
-<!-- ![Actions Status](https://github.com/gena40/yamdb_final/actions/workflows/yamdb_workflow.yml/badge.svg) -->
+![Actions Status](https://github.com/gena40/foodgram-project-react/actions/workflows/workflow.yml/badge.svg)
 
 ### Технологии в проекте:
 - Django 2.2.16
