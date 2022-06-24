@@ -60,6 +60,7 @@ jobs:
         script: |
           sudo docker compose stop
           sudo docker compose rm backend
+          pwd
           touch .env
           echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
           echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env
@@ -67,4 +68,4 @@ jobs:
           echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
           echo DB_HOST=${{ secrets.DB_HOST }} >> .env
           echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-          sudo docker compose up -d
+          sudo docker compose up
