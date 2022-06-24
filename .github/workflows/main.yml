@@ -22,7 +22,6 @@ jobs:
     - name: Test with flake8 and django tests
       run: |
         python -m flake8
-        cd backend/food_assistance/
 
   build_and_push_to_docker_hub:
     name: Push Docker image to Docker Hub
@@ -39,10 +38,9 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Push to Docker Hub
-        uses: |
-          docker/build-push-action@v2
-          cd backend/food_assistance/
+        uses: docker/build-push-action@v2
         with:
+          script: cd backend/food_assistance/
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/food_assistance:latest
 
