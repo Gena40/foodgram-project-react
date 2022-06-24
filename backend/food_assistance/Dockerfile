@@ -4,11 +4,11 @@ ENV SECRET_KEY 'q&pf)9i(g(8#j%awos*$uggm8r%*h#-m^(9x#%ce991^mfhvpu'
 
 COPY ./ /app
 
-WORKDIR /app/
-
 RUN python -m pip install --upgrade pip
 
-RUN pip3 install -r requirements.txt --no-cache-dir
+RUN pip3 install -r app/requirements.txt --no-cache-dir
+
+WORKDIR /app/
 
 RUN python manage.py collectstatic --noinput
 
