@@ -40,7 +40,6 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Push to Docker Hub
         run: |
-          pwd
           cd backend/food_assistance
           docker build -t ${{ secrets.DOCKER_USERNAME }}/food_assistance:latest .
           docker push ${{ secrets.DOCKER_USERNAME }}/food_assistance:latest
