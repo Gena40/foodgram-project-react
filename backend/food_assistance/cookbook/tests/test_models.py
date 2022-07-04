@@ -55,7 +55,7 @@ class StrModelsTest(APITestCase):
         """Проверяем что у моделей корректно работает __str__."""
         obj2tring = {
             StrModelsTest.tag: 'test_tag_name',
-            StrModelsTest.ingredient: 'test_ingr',
+            StrModelsTest.ingredient: 'test_ingr, кг',
             StrModelsTest.recipe: (
                 'Рецепт "Запеканка по-домашнему" автора vasya'
             ),
@@ -63,7 +63,7 @@ class StrModelsTest(APITestCase):
                 'Пользователь vasya подписан на автора author'
             ),
             StrModelsTest.resipe_ingr: (
-                'Количество ингредиента test_ingr в рецепте'
+                'Количество ингредиента test_ingr, кг в рецепте'
                 ' Рецепт "Запеканка по-домашнему" автора vasya - 13'
             )
         }

@@ -1,7 +1,5 @@
 FROM python:3.7-slim
 
-ENV SECRET_KEY 'q&pf)9i(g(8#j%awos*$uggm8r%*h#-m^(9x#%ce991^mfhvpu'
-
 COPY ./ /app
 
 RUN python -m pip install --upgrade pip

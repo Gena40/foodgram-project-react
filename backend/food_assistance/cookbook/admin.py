@@ -1,14 +1,25 @@
 from django.contrib import admin
+from cookbook.forms import RecipeIngredientsFormset
 from cookbook.models import (FavoritRecipes, Ingredient, Recipe,
                              RecipeIngredients, ShoppingCartRecipes, Tag)
 
 
 class FavoritRecipesAdmin(admin.ModelAdmin):
     list_display = ('user', 'recipe')
+    search_fields = (
+        'user__email',
+        'user__username',
+        'recipe__name'
+    )
 
 
 class ShoppingCartRecipesAdmin(admin.ModelAdmin):
     list_display = ('user', 'recipe')
+    search_fields = (
+        'user__email',
+        'user__username',
+        'recipe__name'
+    )
 
 
 class RecipeIngredientsAdmin(admin.ModelAdmin):
@@ -18,10 +29,20 @@ class RecipeIngredientsAdmin(admin.ModelAdmin):
         'ingredient',
         'amount'
     )
-    search_fields = ('recipe', 'ingredient')
+    search_fields = (
+        'recipe__name',
+        'ingredient__name'
+    )
     list_filter = ('recipe', 'ingredient')
     list_display_links = ('recipe', 'ingredient')
     empty_value_display = '-пусто-'
+
+
+class RecipeIngredientsInline(admin.TabularInline):
+    formset = RecipeIngredientsFormset
+    model = RecipeIngredients
+    extra: int = 1
+    verbose_name_plural = 'Ингредиенты'
 
 
 class RecipeAdmin(admin.ModelAdmin):
@@ -34,10 +55,16 @@ class RecipeAdmin(admin.ModelAdmin):
         'created',
         'favorites_counter'
     )
+    fields = (
+        ('name', 'author'),
+        'text',
+        'cooking_time'
+    )
+    inlines = (RecipeIngredientsInline,)
     readonly_fields = ('favorites_counter',)
     filter_horizontal = ('tags', 'ingredients')
-    search_fields = ('name', 'text')
-    list_filter = ('author', 'name', 'tags')
+    search_fields = ('name', 'text', 'author__email', 'author__username')
+    list_filter = ('tags', 'author')
     list_display_links = ('name',)
     empty_value_display = '-пусто-'
 
@@ -48,7 +75,7 @@ class RecipeAdmin(admin.ModelAdmin):
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ('name', 'measurement_unit')
     search_fields = ('name',)
-    list_filter = ('name',)
+    list_filter = ('measurement_unit',)
 
 
 class TagAdmin(admin.ModelAdmin):
