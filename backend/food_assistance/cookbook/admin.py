@@ -33,7 +33,7 @@ class RecipeIngredientsAdmin(admin.ModelAdmin):
         'recipe__name',
         'ingredient__name'
     )
-    list_filter = ('recipe', 'measurement_unit')
+    list_filter = ('recipe',)
     list_display_links = ('recipe', 'ingredient')
     empty_value_display = '-пусто-'
 
