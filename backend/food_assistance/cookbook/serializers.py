@@ -258,7 +258,4 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
 class DownloadShoppingCartSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShoppingCartRecipes
-        fields = (
-            'user',
-            'resipe'
-        )
+        fields = ('user', 'resipe')
