@@ -3,12 +3,12 @@ from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, permissions, status, viewsets
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from users.pagination import CustomPagination
-from cookbook.filters import RecipeFilter
+from cookbook.filters import RecipeFilter, CustomSearchFilter
 from users.models import Follow
 from cookbook.models import (FavoritRecipes, Ingredient, Recipe,
                              RecipeIngredients, ShoppingCartRecipes, Tag)
@@ -19,6 +19,7 @@ from cookbook.serializers import (DownloadShoppingCartSerializer,
                                   RecipesCreateSerializer, RecipesSerializer,
                                   TagSerializer)
 from users.serializers import SbscrptSerializer
+
 
 User = get_user_model()
 
@@ -31,7 +32,7 @@ class TagViewSet(viewsets.ModelViewSet):
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (CustomSearchFilter,)
     search_fields = ('^name',)
 
 
@@ -140,8 +141,9 @@ class RecipesViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action == 'create':
             return (permissions.IsAuthenticated(),)
-        if self.action == 'partial_update':
+        if self.action in ('partial_update', 'destroy'):
             return (IsAuthor(),)
+
         return (permissions.AllowAny(),)
 
     def get_serializer_class(self):
@@ -151,13 +153,28 @@ class RecipesViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         is_favorited = self.request.query_params.get('is_favorited')
+        in_cart = self.request.query_params.get('is_in_shopping_cart')
+        favorit_queryset = None
+        cart_queryset = None
         if self.request.user.is_authenticated:
             if is_favorited == '1':
-                return self.request.user.favorite_recipes.all()
-            if is_favorited == '0':
-                return Recipe.objects.exclude(
+                favorit_queryset = self.request.user.favorite_recipes.all()
+            elif is_favorited == '0':
+                favorit_queryset = Recipe.objects.exclude(
                     favorit_recipe__user=self.request.user
                 )
+            if in_cart == '1':
+                cart_queryset = self.request.user.shopping_cart_recipes.all()
+            elif in_cart == '0':
+                cart_queryset = Recipe.objects.exclude(
+                    cart_recipe__user=self.request.user
+                )
+        if favorit_queryset is not None and cart_queryset is not None:
+            return favorit_queryset & cart_queryset
+        if favorit_queryset is not None:
+            return favorit_queryset
+        if cart_queryset is not None:
+            return cart_queryset
         return Recipe.objects.all()
 
     def create(self, request, *args, **kwargs):

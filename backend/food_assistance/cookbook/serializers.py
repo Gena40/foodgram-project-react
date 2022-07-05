@@ -227,14 +227,15 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         empty_required_fields = dict()
         required_fields = (
-            'ingredients', 'name', 'cooking_time', 'text', 'image', 'tags'
+            'ingredients', 'name', 'cooking_time', 'text', 'tags'
         )
         for field in required_fields:
             if validated_data.get(field) is None:
                 empty_required_fields[field] = 'This field is required.'
         if empty_required_fields:
             raise serializers.ValidationError(detail=empty_required_fields)
-        instance.image = validated_data.get('image')
+        if validated_data.get('image') is not None:
+            instance.image = validated_data.get('image')
         instance.name = validated_data.get('name')
         instance.text = validated_data.get('text')
         instance.cooking_time = validated_data.get('cooking_time')
