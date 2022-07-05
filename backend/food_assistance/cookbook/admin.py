@@ -64,7 +64,7 @@ class RecipeAdmin(admin.ModelAdmin):
     readonly_fields = ('favorites_counter',)
     filter_horizontal = ('tags', 'ingredients')
     search_fields = ('name', 'text', 'author__email', 'author__username')
-    list_filter = ('tags')
+    list_filter = ('tags',)
     list_display_links = ('name',)
     empty_value_display = '-пусто-'
 
