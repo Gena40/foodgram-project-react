@@ -33,7 +33,7 @@ class RecipeIngredientsAdmin(admin.ModelAdmin):
         'recipe__name',
         'ingredient__name'
     )
-    list_filter = ('recipe', 'ingredient')
+    list_filter = ('recipe', 'measurement_unit')
     list_display_links = ('recipe', 'ingredient')
     empty_value_display = '-пусто-'
 
@@ -64,7 +64,7 @@ class RecipeAdmin(admin.ModelAdmin):
     readonly_fields = ('favorites_counter',)
     filter_horizontal = ('tags', 'ingredients')
     search_fields = ('name', 'text', 'author__email', 'author__username')
-    list_filter = ('tags', 'author')
+    list_filter = ('tags')
     list_display_links = ('name',)
     empty_value_display = '-пусто-'
 
